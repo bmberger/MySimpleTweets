@@ -6,23 +6,16 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class User implements Parcelable {
+@org.parceler.Parcel
+public class User {
+
     // list the attributes
     public String name;
     public long uid;
     public String screenName;
     public String profileImageUrl;
 
-    /*protected User(Parcel in) {
-        name = in.readString();
-        uid = in.readLong();
-        screenName = in.readString();
-        profileImageUrl = in.readString();
-    }*/
-
-    public User() {}
-
-    public static final Creator<User> CREATOR = new Creator<User>() {
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>() {
         @Override
         public User createFromParcel(Parcel in) {
             //return new User(in);
@@ -46,18 +39,5 @@ public class User implements Parcelable {
         user.profileImageUrl = json.getString("profile_image_url_https");
 
         return user;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(name);
-        dest.writeLong(uid);
-        dest.writeString(screenName);
-        dest.writeString(profileImageUrl);
     }
 }

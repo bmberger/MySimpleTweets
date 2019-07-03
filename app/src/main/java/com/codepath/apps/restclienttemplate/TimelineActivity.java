@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -13,13 +14,18 @@ import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.ComposeActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.codepath.apps.restclienttemplate.models.User;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -31,6 +37,10 @@ public class TimelineActivity extends AppCompatActivity {
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
     private final int REQUEST_CODE = 20;
+
+    String username;
+    String name;
+    String profileURL;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +61,7 @@ public class TimelineActivity extends AppCompatActivity {
         rvTweets.setAdapter(tweetAdapter);
 
         populateTimeline();
+        retrieveUser();
     }
 
     // activity populates the ActionBar from within this method (for composing a tweet)
@@ -63,6 +74,11 @@ public class TimelineActivity extends AppCompatActivity {
     // action for when user hits compose
     public void onComposeAction(MenuItem mi) {
         Intent composeIntent = new Intent(TimelineActivity.this, ComposeActivity.class);
+
+        // enables us to have the user's data visible when composing a tweet
+        composeIntent.putExtra("ivUsername", "@" + username);
+        composeIntent.putExtra("ivName", name);
+        composeIntent.putExtra("ivProfileURL", profileURL);
         startActivityForResult(composeIntent, REQUEST_CODE);
     }
 
@@ -76,10 +92,6 @@ public class TimelineActivity extends AppCompatActivity {
             // Toast the name to display temporarily on screen
             Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
         }
-        /*tweets.add(0, new Tweet());
-        tweetAdapter.notifyItemInserted(0);
-        rvTweets.scrollToPosition(0);*/
-        /* TO-DO: keeps crashing if this code is added - something to do with tweet()...*/
     }
 
     private void populateTimeline() {
@@ -126,5 +138,38 @@ public class TimelineActivity extends AppCompatActivity {
             }
         });
 
+    }
+
+    private void retrieveUser() {
+        client.getUser(new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+                try {
+                    username = (String) response.get("screen_name");
+                    name = (String) response.get("name");
+                    profileURL = (String) response.get("profile_image_url_https");
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    // relative timestamp on each tweet
+    public String getRelativeTimeAgo(String rawJsonDate) {
+        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
+        sf.setLenient(true);
+
+        String relativeDate = "";
+        try {
+            long dateMillis = sf.parse(rawJsonDate).getTime();
+            relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis,
+                    System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        return relativeDate;
     }
 }

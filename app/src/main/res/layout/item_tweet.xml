@@ -20,17 +20,19 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="TextView"
+        android:text="username"
+        android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/ivProfileImageCompose"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/tvBody"
-        android:layout_width="342dp"
-        android:layout_height="28dp"
+        android:layout_width="325dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="4dp"
-        android:text="TextView"
+        android:text="Body"
         app:layout_constraintStart_toEndOf="@+id/ivProfileImageCompose"
         app:layout_constraintTop_toBottomOf="@+id/tvUserName" />
+
 </android.support.constraint.ConstraintLayout>

@@ -6,7 +6,8 @@ import android.os.Parcelable;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-public class Tweet implements Parcelable {
+@org.parceler.Parcel
+public class Tweet {
 
     // list of the attributes
     public String body;
@@ -14,15 +15,7 @@ public class Tweet implements Parcelable {
     public User user;
     public String createdAt;
 
-    /*protected Tweet(Parcel in) {
-        body = in.readString();
-        uid = in.readLong();
-        user = in.readParcelable(User.class.getClassLoader());
-        createdAt = in.readString();
-    }*/
-    public Tweet() {}
-
-    public static final Creator<Tweet> CREATOR = new Creator<Tweet>() {
+    public static final Parcelable.Creator<Tweet> CREATOR = new Parcelable.Creator<Tweet>() {
         @Override
         public Tweet createFromParcel(Parcel in) {
             //return new Tweet(in);
@@ -46,18 +39,5 @@ public class Tweet implements Parcelable {
         tweet.user = User.fromJSON(jsonObject.getJSONObject("user"));
 
         return tweet;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(body);
-        dest.writeLong(uid);
-        dest.writeParcelable(user, 1);
-        dest.writeString(createdAt);
     }
 }
