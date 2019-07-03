@@ -1,12 +1,17 @@
 package com.codepath.apps.restclienttemplate;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.widget.Toast;
 
+import com.codepath.apps.restclienttemplate.models.ComposeActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
@@ -25,6 +30,7 @@ public class TimelineActivity extends AppCompatActivity {
     TweetAdapter tweetAdapter;
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
+    private final int REQUEST_CODE = 20;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,6 +58,28 @@ public class TimelineActivity extends AppCompatActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
+    }
+
+    // action for when user hits compose
+    public void onComposeAction(MenuItem mi) {
+        Intent composeIntent = new Intent(TimelineActivity.this, ComposeActivity.class);
+        startActivityForResult(composeIntent, REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // REQUEST_CODE is defined above
+        if (resultCode == RESULT_OK && requestCode == REQUEST_CODE) {
+            // Extract name value from result extras
+            String name = data.getExtras().getString("name");
+            int code = data.getExtras().getInt("code", 0);
+            // Toast the name to display temporarily on screen
+            Toast.makeText(this, name, Toast.LENGTH_SHORT).show();
+        }
+        /*tweets.add(0, new Tweet());
+        tweetAdapter.notifyItemInserted(0);
+        rvTweets.scrollToPosition(0);*/
+        /* TO-DO: keeps crashing if this code is added - something to do with tweet()...*/
     }
 
     private void populateTimeline() {

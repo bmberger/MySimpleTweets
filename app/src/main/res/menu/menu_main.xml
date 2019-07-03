@@ -5,6 +5,7 @@
         android:id="@+id/miCompose"
         android:icon="@mipmap/ic_compose"
         app:showAsAction="ifRoom"
+        android:onClick="onComposeAction"
         android:title="Compose">
     </item>
     <item
