@@ -1,6 +1,7 @@
 package com.codepath.apps.restclienttemplate;
 
 import android.content.Intent;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -37,6 +38,7 @@ public class TimelineActivity extends AppCompatActivity {
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
     private final int REQUEST_CODE = 20;
+    private SwipeRefreshLayout swipeContainer;
 
     String username;
     String name;
@@ -60,6 +62,20 @@ public class TimelineActivity extends AppCompatActivity {
         // set adapter
         rvTweets.setAdapter(tweetAdapter);
 
+        swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
+        // Setup refresh listener which triggers new data loading
+        swipeContainer.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+                fetchTimelineAsync(0);
+            }
+        });
+        // Configure the refreshing colors
+        swipeContainer.setColorSchemeResources(android.R.color.holo_blue_bright,
+                android.R.color.holo_green_light,
+                android.R.color.holo_orange_light,
+                android.R.color.holo_red_light);
+
         populateTimeline();
         retrieveUser();
     }
@@ -80,6 +96,13 @@ public class TimelineActivity extends AppCompatActivity {
         composeIntent.putExtra("ivName", name);
         composeIntent.putExtra("ivProfileURL", profileURL);
         startActivityForResult(composeIntent, REQUEST_CODE);
+    }
+
+    // refreshes timeline
+    public void fetchTimelineAsync(int page) {
+        tweetAdapter.clear();
+        populateTimeline();
+        swipeContainer.setRefreshing(false);
     }
 
     @Override
