@@ -3,6 +3,7 @@ package com.codepath.apps.restclienttemplate;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +14,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.codepath.apps.restclienttemplate.models.Tweet;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
@@ -44,13 +48,41 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         Tweet tweet = mTweets.get(position);
 
         // populate the views according to this data - username, body, and image via Glide
-        holder.tvUsername.setText(tweet.user.name);
+        holder.tvName.setText(tweet.user.name);
         holder.tvBody.setText(tweet.body);
+        holder.tvUsername.setText("@" + tweet.user.screenName);
+        holder.tvTimestamp.setText(getRelativeTimeAgo(tweet.getCreatedAt()));
         Glide.with(context)
                 .load(tweet.user.profileImageUrl)
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.ivProfileImage);
 
+    }
+
+    // relative timestamp on each tweet
+    public String getRelativeTimeAgo(String rawJsonDate) {
+        String twitterFormat = "EEE MMM dd HH:mm:ss ZZZZZ yyyy";
+        SimpleDateFormat sf = new SimpleDateFormat(twitterFormat, Locale.ENGLISH);
+        sf.setLenient(true);
+
+        String relativeDate = "";
+        try {
+            long dateMillis = sf.parse(rawJsonDate).getTime();
+            relativeDate = DateUtils.getRelativeTimeSpanString(dateMillis,
+                    System.currentTimeMillis(), DateUtils.SECOND_IN_MILLIS).toString();
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+        //reformat string and turn "minutes ago" into "m" and "seconds ago" to "s"
+        relativeDate = relativeDate.replaceAll(" second.* ago", "s");
+        relativeDate = relativeDate.replaceAll(" minute.* ago", "m");
+        relativeDate = relativeDate.replaceAll(" hour.* ago", "h");
+        relativeDate = relativeDate.replaceAll(" day.* ago", "d");
+        relativeDate = relativeDate.replaceAll(" week.* ago", "w");
+        relativeDate = relativeDate.replaceAll(" month.* ago", "mo");
+
+        return relativeDate;
     }
 
     // allows us to see the total amount of tweets
@@ -62,16 +94,20 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
     // create ViewHolder class that will contain our recycler view
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivProfileImage;
+        public TextView tvName;
         public TextView tvUsername;
         public TextView tvBody;
+        public TextView tvTimestamp;
 
         public ViewHolder(View itemView) {
             super(itemView);
 
             // perform findViewById lookups
             ivProfileImage = (ImageView) itemView.findViewById(R.id.ivProfileImageCompose);
-            tvUsername = (TextView) itemView.findViewById(R.id.tvUserName);
+            tvName = (TextView) itemView.findViewById(R.id.tvName);
+            tvUsername = (TextView) itemView.findViewById(R.id.tvUsername);
             tvBody = (TextView) itemView.findViewById(R.id.tvBody);
+            tvTimestamp = (TextView) itemView.findViewById(R.id.tvTimestamp);
         }
     }
 }

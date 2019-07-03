@@ -16,11 +16,11 @@
         app:srcCompat="@android:color/black" />
 
     <TextView
-        android:id="@+id/tvUserName"
+        android:id="@+id/tvName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:text="username"
+        android:text="Name"
         android:textStyle="bold"
         app:layout_constraintStart_toEndOf="@+id/ivProfileImageCompose"
         app:layout_constraintTop_toTopOf="parent" />
@@ -33,6 +33,33 @@
         android:layout_marginTop="4dp"
         android:text="Body"
         app:layout_constraintStart_toEndOf="@+id/ivProfileImageCompose"
-        app:layout_constraintTop_toBottomOf="@+id/tvUserName" />
+        app:layout_constraintTop_toBottomOf="@+id/tvName" />
+
+    <TextView
+        android:id="@+id/tvUsername"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="username"
+        app:layout_constraintStart_toEndOf="@+id/tvName"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:id="@+id/bullet"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="•"
+        app:layout_constraintStart_toEndOf="@+id/tvUsername"
+        tools:layout_editor_absoluteY="0dp" />
+
+    <TextView
+        android:id="@+id/tvTimestamp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:text="time"
+        app:layout_constraintStart_toEndOf="@+id/bullet"
+        tools:layout_editor_absoluteY="0dp" />
 
 </android.support.constraint.ConstraintLayout>

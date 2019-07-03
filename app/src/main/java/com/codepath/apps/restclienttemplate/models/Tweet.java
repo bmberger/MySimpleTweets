@@ -18,7 +18,6 @@ public class Tweet {
     public static final Parcelable.Creator<Tweet> CREATOR = new Parcelable.Creator<Tweet>() {
         @Override
         public Tweet createFromParcel(Parcel in) {
-            //return new Tweet(in);
             return new Tweet();
         }
 
@@ -39,5 +38,9 @@ public class Tweet {
         tweet.user = User.fromJSON(jsonObject.getJSONObject("user"));
 
         return tweet;
+    }
+
+    public String getCreatedAt() {
+        return createdAt;
     }
 }
