@@ -3,6 +3,7 @@ package com.codepath.apps.restclienttemplate;
 import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.codepath.apps.restclienttemplate.models.ComposeActivity;
@@ -45,6 +47,7 @@ public class TimelineActivity extends AppCompatActivity {
     String username;
     String name;
     String profileURL;
+    MenuItem miActionProgressItem;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,6 +93,26 @@ public class TimelineActivity extends AppCompatActivity {
         return true;
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        // Store instance of the menu item containing progress
+        miActionProgressItem = menu.findItem(R.id.miActionProgress);
+        // Extract the action-view from the menu item
+        ProgressBar v =  (ProgressBar) MenuItemCompat.getActionView(miActionProgressItem);
+        // Return to finish
+        return super.onPrepareOptionsMenu(menu);
+    }
+
+    public void showProgressBar() {
+        // Show progress item
+        miActionProgressItem.setVisible(true);
+    }
+
+    public void hideProgressBar() {
+        // Hide progress item
+        miActionProgressItem.setVisible(false);
+    }
+
     // action for when user hits compose
     public void onComposeAction(MenuItem mi) {
         Intent composeIntent = new Intent(TimelineActivity.this, ComposeActivity.class);
@@ -103,6 +126,7 @@ public class TimelineActivity extends AppCompatActivity {
 
     // refreshes timeline
     public void fetchTimelineAsync(int page) {
+        showProgressBar();
         tweetAdapter.clear();
         populateTimeline();
         swipeContainer.setRefreshing(false);
@@ -143,6 +167,7 @@ public class TimelineActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }
+                hideProgressBar();
             }
 
             @Override

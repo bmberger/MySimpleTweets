@@ -54,7 +54,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="348dp"
         android:layout_marginEnd="16dp"
-        android:background="#03A9F4"
+        android:background="@color/twitter_blue"
         android:text="Tweet"
         android:onClick="submitTweet"
         app:layout_constraintEnd_toEndOf="parent"
