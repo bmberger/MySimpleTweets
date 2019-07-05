@@ -12,6 +12,7 @@
         android:id="@+id/miProfile"
         android:icon="@mipmap/ic_profile"
         app:showAsAction="ifRoom|withText"
+        android:onClick="onProfileTap"
         android:title="Profile">
     </item>
     <item

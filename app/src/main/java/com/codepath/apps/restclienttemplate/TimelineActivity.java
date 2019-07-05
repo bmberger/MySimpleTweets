@@ -14,6 +14,7 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -116,12 +117,20 @@ public class TimelineActivity extends AppCompatActivity {
     // action for when user hits compose
     public void onComposeAction(MenuItem mi) {
         Intent composeIntent = new Intent(TimelineActivity.this, ComposeActivity.class);
-
         // enables us to have the user's data visible when composing a tweet
         composeIntent.putExtra("ivUsername", "@" + username);
         composeIntent.putExtra("ivName", name);
         composeIntent.putExtra("ivProfileURL", profileURL);
         startActivityForResult(composeIntent, REQUEST_CODE);
+    }
+
+    public void onProfileTap(MenuItem mi) {
+        Intent profileIntent = new Intent(TimelineActivity.this, ProfileActivity.class);
+
+        profileIntent.putExtra("ivUsername", "@" + username);
+        profileIntent.putExtra("ivName", name);
+        profileIntent.putExtra("ivProfileURL", profileURL);
+        startActivity(profileIntent);
     }
 
     // refreshes timeline

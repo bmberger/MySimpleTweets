@@ -4,6 +4,7 @@ import android.arch.persistence.room.EntityDeletionOrUpdateAdapter;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -65,6 +66,8 @@ public class ComposeActivity extends AppCompatActivity {
                 .apply(RequestOptions.circleCropTransform())
                 .into(ivProfileImage);
         eText.addTextChangedListener(mTextEditorWatcher); // sets the text watcher for character count
+
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.twitter_blue)));
     }
 
     // charatcer count functionality
