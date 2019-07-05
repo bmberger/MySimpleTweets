@@ -7,7 +7,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 @org.parceler.Parcel
-public class Tweet {
+public
+class Tweet {
 
     // list of the attributes
     public String body;

@@ -1,6 +1,8 @@
 package com.codepath.apps.restclienttemplate.models;
 
+import android.arch.persistence.room.EntityDeletionOrUpdateAdapter;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.support.v7.app.AppCompatActivity;
@@ -20,22 +22,26 @@ import com.codepath.apps.restclienttemplate.R;
 import com.codepath.apps.restclienttemplate.TimelineActivity;
 import com.codepath.apps.restclienttemplate.TwitterApp;
 import com.codepath.apps.restclienttemplate.TwitterClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.parceler.Parcels;
+import org.w3c.dom.Text;
 
 import cz.msebera.android.httpclient.Header;
 
-public class ComposeActivity extends AppCompatActivity {
+import static org.parceler.Parcels.unwrap;
+
+public class ReplyActivity extends AppCompatActivity {
 
     private final int RESULT_OK = 20;
     TwitterClient client;
+    Tweet tweetToReplyTo;
     Tweet tweet;
-    TextView tvFullName;
-    TextView tvScreenName;
-    ImageView ivProfileImage;
+    TextView ivReplyToUser;
     TextView ivCharCount;
     EditText eText;
 
@@ -43,24 +49,18 @@ public class ComposeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_compose);
+        setContentView(R.layout.activity_reply);
 
         client = TwitterApp.getRestClient(this);
 
         // find views and sets user information in compose tweet's views
-        tvFullName = (TextView) findViewById(R.id.ivNameCompose);
-        tvScreenName = (TextView) findViewById(R.id.ivReplyToUser);
-        ivProfileImage = (ImageView) findViewById(R.id.ivProfileImageCompose);
+        ivReplyToUser = (TextView) findViewById(R.id.ivReplyToUser);
         ivCharCount = (TextView) findViewById(R.id.ivCharCount);
         eText = (EditText)findViewById(R.id.inputText);
-
-        tvFullName.setText(getIntent().getStringExtra("ivName"));
-        tvScreenName.setText(getIntent().getStringExtra("ivUsername"));
-        Glide.with(this)
-                .load(getIntent().getStringExtra("ivProfileURL"))
-                .apply(RequestOptions.circleCropTransform())
-                .into(ivProfileImage);
         eText.addTextChangedListener(mTextEditorWatcher); // sets the text watcher for character count
+
+        tweetToReplyTo = unwrap(getIntent().getParcelableExtra("tweet"));
+        ivReplyToUser.setText("replying to @" + tweetToReplyTo.user.screenName);
 
         getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.twitter_blue)));
     }
@@ -86,18 +86,19 @@ public class ComposeActivity extends AppCompatActivity {
 
     public void submitTweet(View view) {
         //purpose of all of this is to have immediate loading of new Tweet locally without refresh
-        String tweetContent = eText.getText().toString();
+        String tweetContent = "@" + tweetToReplyTo.user.screenName + " " + eText.getText().toString();
 
         if(tweetContent.length() > 280) {
             // Ensures that your tweet is less than or equal to 280 characters
             Toast.makeText(this, "Tweet is longer than 280 characters", Toast.LENGTH_LONG).show();
         } else {
             // prepare data intent and pass relevant data back as a result
-            final Intent data = new Intent(ComposeActivity.this, TimelineActivity.class);
+            final Intent data = new Intent(ReplyActivity.this, TimelineActivity.class);
             data.putExtra("status", tweetContent);
+            data.putExtra("in_reply_to_status_id", tweetToReplyTo.uid);
             setResult(RESULT_OK, data); // set result code and bundle data for response
 
-            client.sendTweet(tweetContent, new JsonHttpResponseHandler() {
+            client.replyTweet(tweetContent, tweetToReplyTo.uid, new JsonHttpResponseHandler() {
                 @Override
                 public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
                     super.onSuccess(statusCode, headers, response);

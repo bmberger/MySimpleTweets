@@ -1,40 +1,23 @@
 package com.codepath.apps.restclienttemplate;
 
-import android.content.Intent;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
-import com.bumptech.glide.request.RequestOptions;
-import com.codepath.apps.restclienttemplate.models.ComposeActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.models.User;
-import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import cz.msebera.android.httpclient.Header;
 
@@ -71,7 +54,7 @@ public class ProfileActivity extends AppCompatActivity {
 
         // find views and sets user information in compose tweet's views
         tvFullName = (TextView) findViewById(R.id.ivNameCompose);
-        tvScreenName = (TextView) findViewById(R.id.ivUsernameCompose);
+        tvScreenName = (TextView) findViewById(R.id.ivReplyToUser);
         ivProfileImage = (ImageView) findViewById(R.id.ivProfileImageCompose);
 
         tvFullName.setText(getIntent().getStringExtra("ivName"));
