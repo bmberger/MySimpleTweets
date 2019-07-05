@@ -181,6 +181,21 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                     v.getContext().startActivity(replyIntent);
                 }
             });
+
+            ivProfileImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    Tweet tweet = mTweets.get(position);
+
+                    Intent profileIntent = new Intent(v.getContext(), ProfileActivity.class);
+
+                    profileIntent.putExtra("ivUsername", "@" + tweet.user.screenName);
+                    profileIntent.putExtra("ivName", tweet.user.name);
+                    profileIntent.putExtra("ivProfileURL", tweet.user.profileImageUrl);
+                    v.getContext().startActivity(profileIntent);
+                }
+            });
         }
     }
 }

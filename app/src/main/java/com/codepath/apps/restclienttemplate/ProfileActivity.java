@@ -108,7 +108,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d("Twitter client", errorResponse.toString());
                 throwable.printStackTrace();
             }
-        }, tvScreenName.toString());
+        }, getIntent().getStringExtra("ivUsername"));
 
     }
 }
