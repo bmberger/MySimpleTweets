@@ -1,4 +1,4 @@
-# Project 3 - *Name of App Here*
+# Project 3 - *Simple Tweet*
 
 **Name of your app** is an android app that allows a user to view his Twitter timeline and post a new tweet. The app utilizes [Twitter REST API](https://dev.twitter.com/rest/public).
 
@@ -39,6 +39,7 @@ The following **additional** features are implemented:
 * [x] User's profile tweets are refreshable by pulling down to refresh (i.e pull-to-refresh)
 * [x] Implemented infinite pagination to the profile view.
 * [x] I was able to parcel data about the user from the TimelimeActivity into ComposeActivity allowing you to see the user's name, screen name, and profile image when composing their tweet
+* [x] Changed login page
 
 ## Video Walkthrough
 
