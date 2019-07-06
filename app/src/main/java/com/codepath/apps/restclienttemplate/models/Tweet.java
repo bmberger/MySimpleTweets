@@ -3,6 +3,9 @@ package com.codepath.apps.restclienttemplate.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.bumptech.glide.Glide;
+import com.codepath.apps.restclienttemplate.R;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,6 +18,8 @@ class Tweet {
     public long uid; // database ID for the tweet
     public User user;
     public String createdAt;
+    public int favoriteCount;
+    public boolean favorited;
 
     public static final Parcelable.Creator<Tweet> CREATOR = new Parcelable.Creator<Tweet>() {
         @Override
@@ -37,6 +42,8 @@ class Tweet {
         tweet.uid = jsonObject.getLong("id");
         tweet.createdAt = jsonObject.getString("created_at");
         tweet.user = User.fromJSON(jsonObject.getJSONObject("user"));
+        tweet.favoriteCount = jsonObject.getInt("favorite_count");
+        tweet.favorited = jsonObject.getBoolean("favorited");
 
         return tweet;
     }

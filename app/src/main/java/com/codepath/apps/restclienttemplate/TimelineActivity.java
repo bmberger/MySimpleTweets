@@ -47,11 +47,11 @@ public class TimelineActivity extends AppCompatActivity {
     RecyclerView rvTweets;
     private final int REQUEST_CODE = 20;
     private SwipeRefreshLayout swipeContainer;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     String username;
     String name;
     String profileURL;
-    String userReplyTo;
     MenuItem miActionProgressItem;
 
     @Override
@@ -63,14 +63,25 @@ public class TimelineActivity extends AppCompatActivity {
 
         // find the Recycler View
         rvTweets = (RecyclerView) findViewById(R.id.rvTweet);
-        // init the arraylist data source
         tweets = new ArrayList<>();
         // construct the adapter from this datasource
         tweetAdapter = new TweetAdapter(tweets);
-        // RecyclerView setup (layout manager, use adapter)
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
         // set adapter
         rvTweets.setAdapter(tweetAdapter);
+        
+        // RecyclerView setup (layout manager, use adapter)
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        rvTweets.setLayoutManager(linearLayoutManager);
+        // Retain an instance so that you can call `resetState()` for fresh searches
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // when new data needs to be appended to the list
+                populateTimeline(false);
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvTweets.addOnScrollListener(scrollListener);
 
         swipeContainer = (SwipeRefreshLayout) findViewById(R.id.swipeContainer);
         // Setup refresh listener which triggers new data loading
@@ -86,8 +97,15 @@ public class TimelineActivity extends AppCompatActivity {
                 android.R.color.holo_orange_light,
                 android.R.color.holo_red_light);
 
-        populateTimeline();
+        populateTimeline(true);
         retrieveUser();
+    }
+
+    // resets state of endless recycler view
+    private void resetState() {
+        tweets.clear();
+        tweetAdapter.notifyDataSetChanged();
+        scrollListener.resetState();
     }
 
     // activity populates the ActionBar from within this method (for composing a tweet)
@@ -141,7 +159,8 @@ public class TimelineActivity extends AppCompatActivity {
     public void fetchTimelineAsync(int page) {
         showProgressBar();
         tweetAdapter.clear();
-        populateTimeline();
+        resetState(); // resets state of infinite view of tweets
+        populateTimeline(true);
         swipeContainer.setRefreshing(false);
     }
 
@@ -157,7 +176,14 @@ public class TimelineActivity extends AppCompatActivity {
         }
     }
 
-    private void populateTimeline() {
+    private void populateTimeline(boolean firstTime) {
+        long max_id;
+        if (firstTime) {
+            max_id = 0;
+        } else {
+            // allows us to load endless tweets
+            max_id = tweets.get(tweets.size() - 1).uid - 1;
+        }
         // get data from API with network to populate timeline
         client.getHomeTimeline(new JsonHttpResponseHandler() {
             @Override
@@ -200,7 +226,7 @@ public class TimelineActivity extends AppCompatActivity {
                 Log.d("Twitter client", errorResponse.toString());
                 throwable.printStackTrace();
             }
-        });
+        }, max_id);
 
     }
 

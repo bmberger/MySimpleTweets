@@ -6,6 +6,7 @@ import android.os.Parcel;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.text.format.DateUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,7 +19,10 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.codepath.apps.restclienttemplate.models.ReplyActivity;
 import com.codepath.apps.restclienttemplate.models.Tweet;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.parceler.Parcels;
 
 import java.text.ParseException;
@@ -26,46 +30,11 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.Locale;
 
-import android.content.Intent;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.preference.PreferenceScreen;
-import android.support.v4.view.MenuItemCompat;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
-import android.text.format.DateUtils;
-import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ImageView;
-import android.widget.ProgressBar;
-import android.widget.Toast;
-
-import com.codepath.apps.restclienttemplate.models.ComposeActivity;
-import com.codepath.apps.restclienttemplate.models.ReplyActivity;
-import com.codepath.apps.restclienttemplate.models.Tweet;
-import com.codepath.apps.restclienttemplate.models.User;
-import com.loopj.android.http.AsyncHttpResponseHandler;
-import com.loopj.android.http.JsonHttpResponseHandler;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Locale;
-
 import cz.msebera.android.httpclient.Header;
 
 public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> {
 
+    TwitterClient client;
     private List<Tweet> mTweets;
     private final int REQUEST_CODE = 20;
     Context context;
@@ -98,10 +67,21 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         holder.tvBody.setText(tweet.body);
         holder.tvUsername.setText("@" + tweet.user.screenName);
         holder.tvTimestamp.setText(getRelativeTimeAgo(tweet.getCreatedAt()));
+        holder.tvLikeCount.setText(String.valueOf(tweet.favoriteCount));
         Glide.with(context)
                 .load(tweet.user.profileImageUrl)
                 .apply(RequestOptions.circleCropTransform())
                 .into(holder.ivProfileImage);
+        boolean favorited = tweet.favorited;
+        if (favorited) {
+            Glide.with(context)
+                    .load(R.mipmap.ic_heart_liked)
+                    .into(holder.tvLikeImage);
+        } else {
+            Glide.with(context)
+                    .load(R.mipmap.ic_heart_unliked)
+                    .into(holder.tvLikeImage);
+        }
     }
 
     // relative timestamp on each tweet
@@ -148,15 +128,44 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
         return mTweets.size();
     }
 
+    public void addLike(Tweet tweet) {
+        client.addLikeCount(tweet.uid, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.e("Tweet failed to like", "API couldn't make a correct call with tweet", throwable);
+            }
+        });
+    }
+
+    public void removeLike(Tweet tweet) {
+        client.addLikeCount(tweet.uid, new JsonHttpResponseHandler() {
+            @Override
+            public void onSuccess(int statusCode, Header[] headers, JSONObject response) {
+
+            }
+
+            @Override
+            public void onFailure(int statusCode, Header[] headers, Throwable throwable, JSONObject errorResponse) {
+                Log.e("Tweet failed to unlike", "API couldn't make a correct call with tweet", throwable);
+            }
+        });
+    }
+
     // create ViewHolder class that will contain our recycler view
     public class ViewHolder extends RecyclerView.ViewHolder {
         public ImageView ivProfileImage;
         public TextView tvName;
         public TextView tvUsername;
         public TextView tvBody;
-        public TextView tvPosition;
         public TextView tvTimestamp;
         public ImageView tvReply;
+        public TextView tvLikeCount;
+        public ImageView tvLikeImage;
 
         public ViewHolder(View itemView) {
             super(itemView);
@@ -168,7 +177,10 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
             tvBody = (TextView) itemView.findViewById(R.id.tvBody);
             tvTimestamp = (TextView) itemView.findViewById(R.id.tvTimestamp);
             tvReply = (ImageView) itemView.findViewById(R.id.tvReply);
-            tvPosition = (TextView) itemView.findViewById(R.id.tvPosition);
+            tvLikeCount = (TextView) itemView.findViewById(R.id.icLikeCount);
+            tvLikeImage = (ImageView) itemView.findViewById(R.id.icUnlikedHeart);
+
+            client = TwitterApp.getRestClient(itemView.getContext());
 
             tvReply.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -194,6 +206,28 @@ public class TweetAdapter extends RecyclerView.Adapter<TweetAdapter.ViewHolder> 
                     profileIntent.putExtra("ivName", tweet.user.name);
                     profileIntent.putExtra("ivProfileURL", tweet.user.profileImageUrl);
                     v.getContext().startActivity(profileIntent);
+                }
+            });
+
+            tvLikeImage.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    int position = getAdapterPosition();
+                    Tweet tweet = mTweets.get(position);
+
+                    boolean favorited = tweet.favorited;
+
+                    if (!favorited) {
+                        Glide.with(context)
+                                .load(R.mipmap.ic_heart_liked)
+                                .into(tvLikeImage);
+                        addLike(tweet);
+                    } else {
+                        Glide.with(context)
+                                .load(R.mipmap.ic_heart_unliked)
+                                .into(tvLikeImage);
+                        removeLike(tweet);
+                    }
                 }
             });
         }

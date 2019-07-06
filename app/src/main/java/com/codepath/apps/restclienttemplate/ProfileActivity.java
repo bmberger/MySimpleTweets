@@ -28,6 +28,7 @@ public class ProfileActivity extends AppCompatActivity {
     TweetAdapter tweetAdapter;
     ArrayList<Tweet> tweets;
     RecyclerView rvTweets;
+    private EndlessRecyclerViewScrollListener scrollListener;
 
     TextView tvFullName;
     TextView tvScreenName;
@@ -47,10 +48,22 @@ public class ProfileActivity extends AppCompatActivity {
         tweets = new ArrayList<>();
         // construct the adapter from this datasource
         tweetAdapter = new TweetAdapter(tweets);
-        // RecyclerView setup (layout manager, use adapter)
-        rvTweets.setLayoutManager(new LinearLayoutManager(this));
         // set adapter
         rvTweets.setAdapter(tweetAdapter);
+
+        // RecyclerView setup (layout manager, use adapter)
+        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
+        rvTweets.setLayoutManager(linearLayoutManager);
+        // Retain an instance so that you can call `resetState()` for fresh searches
+        scrollListener = new EndlessRecyclerViewScrollListener(linearLayoutManager) {
+            @Override
+            public void onLoadMore(int page, int totalItemsCount, RecyclerView view) {
+                // when new data needs to be appended to the list
+                populateProfileTimeline(false);
+            }
+        };
+        // Adds the scroll listener to RecyclerView
+        rvTweets.addOnScrollListener(scrollListener);
 
         // find views and sets user information in compose tweet's views
         tvFullName = (TextView) findViewById(R.id.ivNameCompose);
@@ -63,10 +76,23 @@ public class ProfileActivity extends AppCompatActivity {
                 .load(getIntent().getStringExtra("ivProfileURL"))
                 .into(ivProfileImage);
 
-        populateProfileTimeline();
+        resetState(); // ensures that we reset the endless state - each time it starts up
+        populateProfileTimeline(true);
     }
 
-    private void populateProfileTimeline() {
+    private void resetState() {
+        tweets.clear();
+        tweetAdapter.notifyDataSetChanged();
+        scrollListener.resetState();
+    }
+
+    private void populateProfileTimeline(boolean firstTime) {
+        long max_id;
+        if (firstTime) {
+            max_id = 0;
+        } else {
+            max_id = tweets.get(tweets.size() - 1).uid - 1;
+        }
         // get data from API with network to populate timeline
         client.getProfileTimeline(new JsonHttpResponseHandler() {
             @Override
@@ -108,7 +134,7 @@ public class ProfileActivity extends AppCompatActivity {
                 Log.d("Twitter client", errorResponse.toString());
                 throwable.printStackTrace();
             }
-        }, getIntent().getStringExtra("ivUsername"));
+        }, getIntent().getStringExtra("ivUsername"), max_id);
 
     }
 }
